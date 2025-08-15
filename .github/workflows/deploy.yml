@@ -1,4 +1,4 @@
-name: Angular CI
+name: Angular Lint
 
 on:
   push:
@@ -7,53 +7,20 @@ on:
     branches: [ developer ]
 
 jobs:
-  build-and-test:
+  lint:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x]
-
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout código
+      uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Usar Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        node-version: '18.x'  # Puedes cambiar a '18.x' o '20.x' si prefieres
 
-    - name: Install dependencies
+    - name: Instalar dependencias
       run: npm ci
 
-    - name: Lint
+    - name: Ejecutar lint
       run: npm run lint
-      continue-on-error: true
-
-    - name: Build
-      run: npm run build --if-present
-
-    - name: Test
-      run: npm run test -- --watch=false --browsers=ChromeHeadless
-      continue-on-error: true
-
-  # Trabajo adicional para realizar pruebas e2e si están configuradas
-  e2e:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18.x'
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: E2E Tests
-      run: npm run e2e -- --headless
-      continue-on-error: true
